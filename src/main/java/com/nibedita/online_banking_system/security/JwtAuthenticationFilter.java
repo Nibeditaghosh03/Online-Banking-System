@@ -9,6 +9,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -23,7 +25,16 @@ protected void doFilterInternal(
 )throws ServletException, IOException {
     String authHeader = request.getHeader("Authorization");
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
-         String token = authHeader.substring(7);
+        String token = authHeader.substring(7);
+         String email = jwtService.extractEmail(token);
+
+         if(email != null && jwtService.isTokenValid(token)){
+            System.out.println("Valid JWT for: " + email);
+
+        UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken(email, null, null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+         }
 }
         filterChain.doFilter(request, response);
 }

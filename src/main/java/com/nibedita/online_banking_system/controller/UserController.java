@@ -7,6 +7,7 @@ import com.nibedita.online_banking_system.security.JwtService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 
 @RestController
@@ -26,5 +27,10 @@ private JwtService jwtService;
 public String loginUser(@RequestBody LoginRequest request) {
    User user = userService.loginUser(request);
    return jwtService.generateToken(user.getEmail());
+}
+
+@GetMapping
+public List<User> getAllUsers() {
+    return userService.getAllUsers();
 }
 }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.nibedita.online_banking_system.dto.LoginRequest;
+import java.util.List;
 
 
 @Service
@@ -49,5 +50,9 @@ return userRepository.save(user);
         }
 
         return user;
+}
+
+public List<User> getAllUsers() {
+    return userRepository.findAll();
 }
 }
