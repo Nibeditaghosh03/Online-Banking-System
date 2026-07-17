@@ -23,21 +23,27 @@ public class User {
     private String email;
 
     @JsonIgnore
-@Column(nullable = false)
-private String password;
-
-    @Column(unique = true, nullable = false)
-    private String accountNumber;
-
     @Column(nullable = false)
-    private Double balance = 0.0;
+    private String password;
+
+    
+    
     
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false)
-    private String role;
+    @Column(nullable = false, unique = true)
+    private String accountNumber;
 
     @Column(nullable = false)
-    private Boolean active;
+    private Double balance = Double.valueOf(0.0);
+
+    
+
+    @Column(nullable = false)
+    private Boolean active = true;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }

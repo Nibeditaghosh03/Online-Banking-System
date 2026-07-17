@@ -25,7 +25,7 @@ public PasswordEncoder passwordEncoder() {
         http
     .csrf(csrf -> csrf.disable())
     .authorizeHttpRequests(auth -> auth
-        .requestMatchers("/api/users/register", "/api/users/login", "/error").permitAll()
+        .requestMatchers("/auth/**").permitAll()
         .anyRequest().authenticated()
     )
     .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

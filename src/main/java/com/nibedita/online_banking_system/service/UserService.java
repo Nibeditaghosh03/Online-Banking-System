@@ -8,7 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.nibedita.online_banking_system.dto.LoginRequest;
 import java.util.List;
-
+import com.nibedita.online_banking_system.dto.BalanceResponse;
+import com.nibedita.online_banking_system.entity.Role;
 
 @Service
 public class UserService {
@@ -33,7 +34,7 @@ private PasswordEncoder passwordEncoder;
 
 user.setBalance(Double.valueOf(0.0));
 user.setActive(true);
-user.setRole("USER");
+user.setRole(Role.USER);
 
 String accountNumber = "ACC" + System.currentTimeMillis();
 user.setAccountNumber(accountNumber);
@@ -54,5 +55,16 @@ return userRepository.save(user);
 
 public List<User> getAllUsers() {
     return userRepository.findAll();
+}
+
+public BalanceResponse getBalance(String email) {
+
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    return new BalanceResponse(
+            user.getAccountNumber(),
+            user.getBalance()
+    );
 }
 }
