@@ -8,6 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 public class SecurityConfig {
@@ -22,13 +23,19 @@ public PasswordEncoder passwordEncoder() {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
       
-        http
+    http
     .csrf(csrf -> csrf.disable())
+    .sessionManagement(session -> session
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    )
     .authorizeHttpRequests(auth -> auth
         .requestMatchers("/auth/**").permitAll()
         .anyRequest().authenticated()
     )
-    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    .addFilterBefore(
+        jwtAuthenticationFilter,
+        UsernamePasswordAuthenticationFilter.class
+    );
 
 return http.build();
     }

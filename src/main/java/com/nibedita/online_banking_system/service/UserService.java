@@ -10,6 +10,7 @@ import com.nibedita.online_banking_system.dto.LoginRequest;
 import java.util.List;
 import com.nibedita.online_banking_system.dto.BalanceResponse;
 import com.nibedita.online_banking_system.entity.Role;
+import com.nibedita.online_banking_system.dto.DepositRequest;
 
 @Service
 public class UserService {
@@ -66,5 +67,19 @@ public BalanceResponse getBalance(String email) {
             user.getAccountNumber(),
             user.getBalance()
     );
+}
+
+public BalanceResponse deposit(String email, DepositRequest request) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("User not found"));
+
+        double amount = request.getAmount();
+        user.setBalance(user.getBalance() + amount);
+        userRepository.save(user);
+
+       return new BalanceResponse(
+        user.getAccountNumber(),
+        user.getBalance()
+);
 }
 }
