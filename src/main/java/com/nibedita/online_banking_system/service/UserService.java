@@ -1,6 +1,7 @@
 package com.nibedita.online_banking_system.service;
 
 import com.nibedita.online_banking_system.dto.RegisterRequest;
+import com.nibedita.online_banking_system.dto.WithdrawRequest;
 import com.nibedita.online_banking_system.entity.User;
 import com.nibedita.online_banking_system.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import java.util.List;
 import com.nibedita.online_banking_system.dto.BalanceResponse;
 import com.nibedita.online_banking_system.entity.Role;
 import com.nibedita.online_banking_system.dto.DepositRequest;
+
 
 @Service
 public class UserService {
@@ -39,6 +41,15 @@ user.setRole(Role.USER);
 
 String accountNumber = "ACC" + System.currentTimeMillis();
 user.setAccountNumber(accountNumber);
+
+System.out.println("Registering user:");
+System.out.println("Name: " + user.getFullName());
+System.out.println("Email: " + user.getEmail());
+System.out.println("Phone: " + user.getPhoneNumber());
+System.out.println("Account: " + user.getAccountNumber());
+System.out.println("Balance: " + user.getBalance());
+System.out.println("Active: " + user.getActive());
+System.out.println("Role: " + user.getRole());
 
 return userRepository.save(user);
     }
@@ -81,5 +92,31 @@ public BalanceResponse deposit(String email, DepositRequest request) {
         user.getAccountNumber(),
         user.getBalance()
 );
+}
+    public BalanceResponse withdraw(String email, WithdrawRequest request) {
+
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    double amount = request.getAmount();
+
+    if (amount <= 0) {
+        throw new RuntimeException("Withdrawal amount must be greater than zero");
+    }
+
+   if (user.getBalance() < amount) {
+    throw new RuntimeException(
+        "Insufficient balance"
+    );
+}
+
+    user.setBalance(user.getBalance() - amount);
+
+    userRepository.save(user);
+
+    return new BalanceResponse(
+            user.getAccountNumber(),
+            user.getBalance()
+    );
 }
 }

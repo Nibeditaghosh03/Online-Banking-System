@@ -6,6 +6,7 @@ import com.nibedita.online_banking_system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.nibedita.online_banking_system.dto.DepositRequest;
+import com.nibedita.online_banking_system.dto.WithdrawRequest;
 
 @RestController
 @RequestMapping("/api/account")
@@ -25,6 +26,14 @@ public BalanceResponse deposit(
         @RequestBody DepositRequest request) {
 
     return userService.deposit(email, request);
+}
+
+@PostMapping("/withdraw")
+public BalanceResponse withdraw(
+        @RequestParam String email,
+        @RequestBody WithdrawRequest request) {
+
+    return userService.withdraw(email, request);
 }
 
 }
