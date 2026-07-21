@@ -12,6 +12,8 @@ import java.util.List;
 import com.nibedita.online_banking_system.dto.BalanceResponse;
 import com.nibedita.online_banking_system.entity.Role;
 import com.nibedita.online_banking_system.dto.DepositRequest;
+import com.nibedita.online_banking_system.dto.TransferRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -117,6 +119,58 @@ public BalanceResponse deposit(String email, DepositRequest request) {
     return new BalanceResponse(
             user.getAccountNumber(),
             user.getBalance()
+    );
+}
+
+@Transactional
+public BalanceResponse transfer(String senderEmail, TransferRequest request) {
+
+    
+    User sender = userRepository.findByEmail(senderEmail)
+            .orElseThrow(() -> new RuntimeException("Sender not found"));
+
+    
+    User receiver = userRepository.findByAccountNumber(
+            request.getReceiverAccountNumber()
+    ).orElseThrow(() -> new RuntimeException("Receiver account not found"));
+
+    double amount = request.getAmount();
+
+    
+    if (amount <= 0) {
+        throw new RuntimeException(
+                "Transfer amount must be greater than zero"
+        );
+    }
+
+    
+    if (sender.getAccountNumber().equals(receiver.getAccountNumber())) {
+        throw new RuntimeException(
+                "Cannot transfer money to your own account"
+        );
+    }
+
+    
+    if (sender.getBalance() < amount) {
+        throw new RuntimeException(
+                "Insufficient balance"
+        );
+    }
+
+   
+    sender.setBalance(sender.getBalance() - amount);
+
+  
+    receiver.setBalance(receiver.getBalance() + amount);
+
+    
+    userRepository.save(sender);
+    userRepository.save(receiver);
+
+    
+    return new BalanceResponse(
+            sender.getAccountNumber(),
+            sender.getBalance()
     );
 }
 }
