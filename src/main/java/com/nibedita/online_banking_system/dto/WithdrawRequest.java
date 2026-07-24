@@ -1,8 +1,9 @@
 package com.nibedita.online_banking_system.dto;
-import com.nibedita.online_banking_system.dto.WithdrawRequest;
+import jakarta.validation.constraints.Positive;
 
 public class WithdrawRequest {
 
+    @Positive(message = "Withdrawal amount must be greater than zero")
     private double amount;
 
     public WithdrawRequest() {

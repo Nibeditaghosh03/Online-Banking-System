@@ -14,6 +14,11 @@ import com.nibedita.online_banking_system.entity.Role;
 import com.nibedita.online_banking_system.dto.DepositRequest;
 import com.nibedita.online_banking_system.dto.TransferRequest;
 import org.springframework.transaction.annotation.Transactional;
+import com.nibedita.online_banking_system.repository.TransactionRepository;
+import com.nibedita.online_banking_system.entity.Transaction;
+import com.nibedita.online_banking_system.entity.TransactionType;
+import java.time.LocalDateTime;
+import com.nibedita.online_banking_system.dto.TransactionResponse;
 
 
 @Service
@@ -23,6 +28,9 @@ private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     public User registerUser(RegisterRequest request) {
 
@@ -81,20 +89,35 @@ public BalanceResponse getBalance(String email) {
             user.getBalance()
     );
 }
-
+@Transactional
 public BalanceResponse deposit(String email, DepositRequest request) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RuntimeException("User not found"));
 
         double amount = request.getAmount();
+        if (amount <= 0) {
+    throw new RuntimeException(
+        "Deposit amount must be greater than zero"
+    );
+}
         user.setBalance(user.getBalance() + amount);
         userRepository.save(user);
+
+        Transaction transaction = new Transaction();
+
+        transaction.setTransactionType(TransactionType.DEPOSIT);
+        transaction.setAmount(amount);
+        transaction.setReceiverAccountNumber(user.getAccountNumber());
+        transaction.setTimestamp(LocalDateTime.now());
+
+        transactionRepository.save(transaction);
 
        return new BalanceResponse(
         user.getAccountNumber(),
         user.getBalance()
 );
 }
+    @Transactional
     public BalanceResponse withdraw(String email, WithdrawRequest request) {
 
     User user = userRepository.findByEmail(email)
@@ -115,6 +138,13 @@ public BalanceResponse deposit(String email, DepositRequest request) {
     user.setBalance(user.getBalance() - amount);
 
     userRepository.save(user);
+    Transaction transaction = new Transaction();
+    transaction.setTransactionType(TransactionType.WITHDRAW);
+    transaction.setAmount(amount);
+    transaction.setSenderAccountNumber(user.getAccountNumber());
+    transaction.setTimestamp(LocalDateTime.now());
+
+    transactionRepository.save(transaction);
 
     return new BalanceResponse(
             user.getAccountNumber(),
@@ -167,10 +197,46 @@ public BalanceResponse transfer(String senderEmail, TransferRequest request) {
     userRepository.save(sender);
     userRepository.save(receiver);
 
+    Transaction transaction = new Transaction();
+
+    transaction.setTransactionType(TransactionType.TRANSFER);
+    transaction.setAmount(amount);
+    transaction.setSenderAccountNumber(sender.getAccountNumber());
+    transaction.setReceiverAccountNumber(receiver.getAccountNumber());
+    transaction.setTimestamp(LocalDateTime.now());
+
+    transactionRepository.save(transaction);
+
     
     return new BalanceResponse(
             sender.getAccountNumber(),
             sender.getBalance()
     );
+}
+
+public List<TransactionResponse> getTransactionHistory(String email) {
+
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    String accountNumber = user.getAccountNumber();
+
+    List<Transaction> transactions =
+            transactionRepository
+                    .findBySenderAccountNumberOrReceiverAccountNumberOrderByTimestampDesc(
+                            accountNumber,
+                            accountNumber
+                    );
+
+    return transactions.stream()
+            .map(transaction -> new TransactionResponse(
+                    transaction.getId(),
+                    transaction.getTransactionType(),
+                    transaction.getAmount(),
+                    transaction.getSenderAccountNumber(),
+                    transaction.getReceiverAccountNumber(),
+                    transaction.getTimestamp()
+            ))
+            .toList();
 }
 }

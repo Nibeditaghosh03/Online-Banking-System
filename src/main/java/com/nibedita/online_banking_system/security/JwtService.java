@@ -6,12 +6,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 
 
 
 @Service
 public class JwtService {
-    private final String SECRET_KEY = "MyOnlineBankingSecretKey12345678901234567890";
+    @Value("${jwt.secret}")
+private String SECRET_KEY;
    public String generateToken(String email) {
     return Jwts.builder()
             .subject(email)
@@ -37,6 +39,7 @@ public boolean isTokenValid(String token) {
 
     return true;
 } catch (Exception e) {
+    System.out.println("TOKEN VALIDATION ERROR: " + e.getMessage());
     return false;
 }
 }
