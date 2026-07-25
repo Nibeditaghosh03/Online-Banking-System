@@ -18,15 +18,14 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [balance, setBalance] = useState(0)
 
-  // Deposit
   const [depositAmount, setDepositAmount] = useState('')
-
-  // Withdraw
   const [withdrawAmount, setWithdrawAmount] = useState('')
 
-  // Transfer
   const [receiverAccountNumber, setReceiverAccountNumber] = useState('')
   const [transferAmount, setTransferAmount] = useState('')
+
+  // Transaction History
+  const [transactions, setTransactions] = useState([])
 
 
   // ==========================
@@ -67,11 +66,9 @@ function App() {
         data.accountNumber
       )
 
-      // Go to login page
       setShowRegister(false)
       setShowLogin(true)
 
-      // Clear fields
       setFullName('')
       setPassword('')
       setPhoneNumber('')
@@ -79,7 +76,6 @@ function App() {
     } catch (error) {
 
       console.error(error)
-
       alert('Could not register user')
     }
   }
@@ -126,7 +122,6 @@ function App() {
     } catch (error) {
 
       console.error(error)
-
       alert('Invalid email or password')
     }
   }
@@ -165,7 +160,6 @@ function App() {
     } catch (error) {
 
       console.error(error)
-
       alert('Could not fetch balance')
     }
   }
@@ -179,7 +173,6 @@ function App() {
     try {
 
       const token = localStorage.getItem('token')
-
       const amount = Number(depositAmount)
 
       if (amount <= 0) {
@@ -212,7 +205,6 @@ function App() {
       console.log('Deposit response:', data)
 
       setBalance(data.balance)
-
       setDepositAmount('')
 
       alert('Deposit successful!')
@@ -220,7 +212,6 @@ function App() {
     } catch (error) {
 
       console.error(error)
-
       alert('Could not deposit money')
     }
   }
@@ -234,7 +225,6 @@ function App() {
     try {
 
       const token = localStorage.getItem('token')
-
       const amount = Number(withdrawAmount)
 
       if (amount <= 0) {
@@ -267,7 +257,6 @@ function App() {
       console.log('Withdraw response:', data)
 
       setBalance(data.balance)
-
       setWithdrawAmount('')
 
       alert('Withdrawal successful!')
@@ -275,7 +264,6 @@ function App() {
     } catch (error) {
 
       console.error(error)
-
       alert('Could not withdraw money')
     }
   }
@@ -289,7 +277,6 @@ function App() {
     try {
 
       const token = localStorage.getItem('token')
-
       const amount = Number(transferAmount)
 
       if (!receiverAccountNumber.trim()) {
@@ -337,14 +324,52 @@ function App() {
     } catch (error) {
 
       console.error(error)
-
       alert('Could not transfer money')
     }
   }
 
 
   // ==========================
-  // DASHBOARD SCREEN
+  // TRANSACTION HISTORY
+  // ==========================
+
+  const handleTransactionHistory = async () => {
+    try {
+
+      const token = localStorage.getItem('token')
+
+      const response = await fetch(
+        'http://localhost:8080/api/account/transactions',
+        {
+          method: 'GET',
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch transactions')
+      }
+
+      const data = await response.json()
+
+      console.log('Transaction history:', data)
+
+      setTransactions(data)
+
+    } catch (error) {
+
+      console.error(error)
+
+      alert('Could not fetch transaction history')
+    }
+  }
+
+
+  // ==========================
+  // DASHBOARD
   // ==========================
 
   if (isLoggedIn) {
@@ -434,6 +459,79 @@ function App() {
         <br />
 
 
+        {/* TRANSACTION HISTORY */}
+
+        <button onClick={handleTransactionHistory}>
+          Transaction History
+        </button>
+
+        <br />
+        <br />
+
+
+        {/* DISPLAY TRANSACTIONS */}
+
+        {transactions.length > 0 && (
+          <div>
+
+            <h2>Transaction History</h2>
+
+            <table border="1">
+
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Sender</th>
+                  <th>Receiver</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                {transactions.map((transaction) => (
+
+                  <tr key={transaction.id}>
+
+                    <td>
+                      {transaction.transactionType}
+                    </td>
+
+                    <td>
+                      ${Number(transaction.amount).toFixed(2)}
+                    </td>
+
+                    <td>
+                      {transaction.senderAccountNumber || '-'}
+                    </td>
+
+                    <td>
+                      {transaction.receiverAccountNumber || '-'}
+                    </td>
+
+                    <td>
+                      {transaction.timestamp
+                        ? new Date(transaction.timestamp).toLocaleString()
+                        : '-'}
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          </div>
+        )}
+
+
+        <br />
+        <br />
+
+
         {/* LOGOUT */}
 
         <button
@@ -456,8 +554,11 @@ function App() {
 
             setDepositAmount('')
             setWithdrawAmount('')
+
             setReceiverAccountNumber('')
             setTransferAmount('')
+
+            setTransactions([])
           }}
         >
           Logout
