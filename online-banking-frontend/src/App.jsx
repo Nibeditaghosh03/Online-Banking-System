@@ -9,8 +9,9 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [balance, setBalance] = useState(0)
 
-  // Deposit amount
+  // Amount states
   const [depositAmount, setDepositAmount] = useState('')
+  const [withdrawAmount, setWithdrawAmount] = useState('')
 
 
   // ==========================
@@ -20,18 +21,21 @@ function App() {
   const handleLogin = async () => {
     try {
 
-      const response = await fetch('http://localhost:8080/auth/login', {
-        method: 'POST',
+      const response = await fetch(
+        'http://localhost:8080/auth/login',
+        {
+          method: 'POST',
 
-        headers: {
-          'Content-Type': 'application/json',
-        },
+          headers: {
+            'Content-Type': 'application/json',
+          },
 
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      })
+          body: JSON.stringify({
+            email: email,
+            password: password,
+          }),
+        }
+      )
 
       if (!response.ok) {
         throw new Error('Login failed')
@@ -105,6 +109,13 @@ function App() {
 
       const token = localStorage.getItem('token')
 
+      const amount = Number(depositAmount)
+
+      if (amount <= 0) {
+        alert('Please enter a valid deposit amount')
+        return
+      }
+
       const response = await fetch(
         'http://localhost:8080/api/account/deposit',
         {
@@ -116,7 +127,7 @@ function App() {
           },
 
           body: JSON.stringify({
-            amount: Number(depositAmount),
+            amount: amount,
           }),
         }
       )
@@ -129,10 +140,8 @@ function App() {
 
       console.log('Deposit response:', data)
 
-      // Update balance on dashboard
       setBalance(data.balance)
 
-      // Clear deposit input
       setDepositAmount('')
 
       alert('Deposit successful!')
@@ -142,6 +151,61 @@ function App() {
       console.error(error)
 
       alert('Could not deposit money')
+    }
+  }
+
+
+  // ==========================
+  // WITHDRAW
+  // ==========================
+
+  const handleWithdraw = async () => {
+    try {
+
+      const token = localStorage.getItem('token')
+
+      const amount = Number(withdrawAmount)
+
+      if (amount <= 0) {
+        alert('Please enter a valid withdraw amount')
+        return
+      }
+
+      const response = await fetch(
+        'http://localhost:8080/api/account/withdraw',
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            amount: amount,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Withdraw failed')
+      }
+
+      const data = await response.json()
+
+      console.log('Withdraw response:', data)
+
+      setBalance(data.balance)
+
+      setWithdrawAmount('')
+
+      alert('Withdrawal successful!')
+
+    } catch (error) {
+
+      console.error(error)
+
+      alert('Could not withdraw money')
     }
   }
 
@@ -186,13 +250,24 @@ function App() {
           Deposit
         </button>
 
+        <br />
+        <br />
+
 
         {/* WITHDRAW */}
 
-        <button>
+        <input
+          type="number"
+          placeholder="Enter withdraw amount"
+          value={withdrawAmount}
+          onChange={(e) => setWithdrawAmount(e.target.value)}
+        />
+
+        <button onClick={handleWithdraw}>
           Withdraw
         </button>
 
+        <br />
         <br />
 
 
@@ -202,6 +277,7 @@ function App() {
           Transfer Money
         </button>
 
+        <br />
         <br />
 
 
@@ -215,6 +291,10 @@ function App() {
 
             setIsLoggedIn(false)
             setShowLogin(false)
+
+            setEmail('')
+            setPassword('')
+            setBalance(0)
           }}
         >
           Logout
