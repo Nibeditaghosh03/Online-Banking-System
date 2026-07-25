@@ -24,8 +24,8 @@ function App() {
   const [receiverAccountNumber, setReceiverAccountNumber] = useState('')
   const [transferAmount, setTransferAmount] = useState('')
 
-  // Transaction History
   const [transactions, setTransactions] = useState([])
+  const [showPassword, setShowPassword] = useState(false)
 
 
   // ==========================
@@ -35,20 +35,28 @@ function App() {
   const handleRegister = async () => {
     try {
 
+      if (
+        !fullName.trim() ||
+        !email.trim() ||
+        !password.trim() ||
+        !phoneNumber.trim()
+      ) {
+        alert('Please fill in all fields')
+        return
+      }
+
       const response = await fetch(
         'http://localhost:8080/auth/register',
         {
           method: 'POST',
-
           headers: {
             'Content-Type': 'application/json',
           },
-
           body: JSON.stringify({
-            fullName: fullName,
-            email: email,
-            password: password,
-            phoneNumber: phoneNumber,
+            fullName,
+            email,
+            password,
+            phoneNumber,
           }),
         }
       )
@@ -88,18 +96,21 @@ function App() {
   const handleLogin = async () => {
     try {
 
+      if (!email.trim() || !password.trim()) {
+        alert('Please enter email and password')
+        return
+      }
+
       const response = await fetch(
         'http://localhost:8080/auth/login',
         {
           method: 'POST',
-
           headers: {
             'Content-Type': 'application/json',
           },
-
           body: JSON.stringify({
-            email: email,
-            password: password,
+            email,
+            password,
           }),
         }
       )
@@ -115,9 +126,10 @@ function App() {
 
       console.log('JWT Token:', token)
 
-      alert('Login successful!')
-
       setIsLoggedIn(true)
+      setShowLogin(false)
+
+      alert('Login successful!')
 
     } catch (error) {
 
@@ -140,7 +152,6 @@ function App() {
         'http://localhost:8080/api/account/balance',
         {
           method: 'GET',
-
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -175,7 +186,7 @@ function App() {
       const token = localStorage.getItem('token')
       const amount = Number(depositAmount)
 
-      if (amount <= 0) {
+      if (!depositAmount || amount <= 0) {
         alert('Please enter a valid deposit amount')
         return
       }
@@ -184,14 +195,12 @@ function App() {
         'http://localhost:8080/api/account/deposit',
         {
           method: 'POST',
-
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-
           body: JSON.stringify({
-            amount: amount,
+            amount,
           }),
         }
       )
@@ -227,7 +236,7 @@ function App() {
       const token = localStorage.getItem('token')
       const amount = Number(withdrawAmount)
 
-      if (amount <= 0) {
+      if (!withdrawAmount || amount <= 0) {
         alert('Please enter a valid withdraw amount')
         return
       }
@@ -236,14 +245,12 @@ function App() {
         'http://localhost:8080/api/account/withdraw',
         {
           method: 'POST',
-
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-
           body: JSON.stringify({
-            amount: amount,
+            amount,
           }),
         }
       )
@@ -284,7 +291,7 @@ function App() {
         return
       }
 
-      if (amount <= 0) {
+      if (!transferAmount || amount <= 0) {
         alert('Please enter a valid transfer amount')
         return
       }
@@ -293,15 +300,13 @@ function App() {
         'http://localhost:8080/api/account/transfer',
         {
           method: 'POST',
-
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-
           body: JSON.stringify({
             receiverAccountNumber: receiverAccountNumber.trim(),
-            amount: amount,
+            amount,
           }),
         }
       )
@@ -342,7 +347,6 @@ function App() {
         'http://localhost:8080/api/account/transactions',
         {
           method: 'GET',
-
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -362,9 +366,39 @@ function App() {
     } catch (error) {
 
       console.error(error)
-
       alert('Could not fetch transaction history')
     }
+  }
+
+
+  // ==========================
+  // LOGOUT
+  // ==========================
+
+  const handleLogout = () => {
+
+    localStorage.removeItem('token')
+    localStorage.removeItem('email')
+
+    setIsLoggedIn(false)
+
+    setShowLogin(false)
+    setShowRegister(false)
+
+    setFullName('')
+    setEmail('')
+    setPassword('')
+    setPhoneNumber('')
+
+    setBalance(0)
+
+    setDepositAmount('')
+    setWithdrawAmount('')
+
+    setReceiverAccountNumber('')
+    setTransferAmount('')
+
+    setTransactions([])
   }
 
 
@@ -374,195 +408,275 @@ function App() {
 
   if (isLoggedIn) {
     return (
-      <div>
+      <div className="dashboard">
 
-        <h1>Banking Dashboard</h1>
+        {/* HEADER */}
 
-        <h2>Welcome!</h2>
+        <header className="dashboard-header">
 
-        <p>
-          Account Balance: ${balance.toFixed(2)}
-        </p>
+          <div>
+            <h1>Online Banking</h1>
+            <p className="dashboard-subtitle">
+              Manage your account securely
+            </p>
+          </div>
 
+          <button
+            className="logout-button"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
 
-        {/* CHECK BALANCE */}
-
-        <button onClick={handleCheckBalance}>
-          Check Balance
-        </button>
-
-        <br />
-        <br />
-
-
-        {/* DEPOSIT */}
-
-        <input
-          type="number"
-          placeholder="Enter deposit amount"
-          value={depositAmount}
-          onChange={(e) => setDepositAmount(e.target.value)}
-        />
-
-        <button onClick={handleDeposit}>
-          Deposit
-        </button>
-
-        <br />
-        <br />
+        </header>
 
 
-        {/* WITHDRAW */}
+        {/* BALANCE CARD */}
 
-        <input
-          type="number"
-          placeholder="Enter withdraw amount"
-          value={withdrawAmount}
-          onChange={(e) => setWithdrawAmount(e.target.value)}
-        />
+        <section className="balance-card">
 
-        <button onClick={handleWithdraw}>
-          Withdraw
-        </button>
+          <p className="balance-label">
+            Available Balance
+          </p>
 
-        <br />
-        <br />
+          <h2 className="balance-amount">
+            ${Number(balance).toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </h2>
+
+          <button
+            className="balance-button"
+            onClick={handleCheckBalance}
+          >
+            Refresh Balance
+          </button>
+
+        </section>
 
 
-        {/* TRANSFER */}
+        {/* BANKING ACTIONS */}
 
-        <input
-          type="text"
-          placeholder="Receiver account number"
-          value={receiverAccountNumber}
-          onChange={(e) =>
-            setReceiverAccountNumber(e.target.value)
-          }
-        />
+        <section className="actions-section">
 
-        <br />
+          <h2>Banking Services</h2>
 
-        <input
-          type="number"
-          placeholder="Enter transfer amount"
-          value={transferAmount}
-          onChange={(e) =>
-            setTransferAmount(e.target.value)
-          }
-        />
+          <div className="action-grid">
 
-        <button onClick={handleTransfer}>
-          Transfer Money
-        </button>
 
-        <br />
-        <br />
+            {/* DEPOSIT CARD */}
+
+            <div className="action-card">
+
+              <div className="action-icon">
+                ↓
+              </div>
+
+              <h3>Deposit</h3>
+
+              <p>
+                Add money to your account.
+              </p>
+
+              <input
+                type="number"
+                min="0"
+                placeholder="Enter amount"
+                value={depositAmount}
+                onChange={(e) =>
+                  setDepositAmount(e.target.value)
+                }
+              />
+
+              <button onClick={handleDeposit}>
+                Deposit Money
+              </button>
+
+            </div>
+
+
+            {/* WITHDRAW CARD */}
+
+            <div className="action-card">
+
+              <div className="action-icon">
+                ↑
+              </div>
+
+              <h3>Withdraw</h3>
+
+              <p>
+                Withdraw money from your balance.
+              </p>
+
+              <input
+                type="number"
+                min="0"
+                placeholder="Enter amount"
+                value={withdrawAmount}
+                onChange={(e) =>
+                  setWithdrawAmount(e.target.value)
+                }
+              />
+
+              <button onClick={handleWithdraw}>
+                Withdraw Money
+              </button>
+
+            </div>
+
+
+            {/* TRANSFER CARD */}
+
+            <div className="action-card">
+
+              <div className="action-icon">
+                ⇄
+              </div>
+
+              <h3>Transfer</h3>
+
+              <p>
+                Send money to another account.
+              </p>
+
+              <input
+                type="text"
+                placeholder="Receiver account number"
+                value={receiverAccountNumber}
+                onChange={(e) =>
+                  setReceiverAccountNumber(e.target.value)
+                }
+              />
+
+              <input
+                type="number"
+                min="0"
+                placeholder="Transfer amount"
+                value={transferAmount}
+                onChange={(e) =>
+                  setTransferAmount(e.target.value)
+                }
+              />
+
+              <button onClick={handleTransfer}>
+                Transfer Money
+              </button>
+
+            </div>
+
+          </div>
+
+        </section>
 
 
         {/* TRANSACTION HISTORY */}
 
-        <button onClick={handleTransactionHistory}>
-          Transaction History
-        </button>
+        <section className="transaction-section">
 
-        <br />
-        <br />
+          <div className="transaction-header">
 
+            <div>
+              <h2>Transaction History</h2>
 
-        {/* DISPLAY TRANSACTIONS */}
+              <p>
+                View your recent account activity.
+              </p>
+            </div>
 
-        {transactions.length > 0 && (
-          <div>
-
-            <h2>Transaction History</h2>
-
-            <table border="1">
-
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Sender</th>
-                  <th>Receiver</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-
-              <tbody>
-
-                {transactions.map((transaction) => (
-
-                  <tr key={transaction.id}>
-
-                    <td>
-                      {transaction.transactionType}
-                    </td>
-
-                    <td>
-                      ${Number(transaction.amount).toFixed(2)}
-                    </td>
-
-                    <td>
-                      {transaction.senderAccountNumber || '-'}
-                    </td>
-
-                    <td>
-                      {transaction.receiverAccountNumber || '-'}
-                    </td>
-
-                    <td>
-                      {transaction.timestamp
-                        ? new Date(transaction.timestamp).toLocaleString()
-                        : '-'}
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
+            <button onClick={handleTransactionHistory}>
+              Load Transactions
+            </button>
 
           </div>
-        )}
 
 
-        <br />
-        <br />
+          {transactions.length === 0 ? (
 
+            <div className="empty-transactions">
 
-        {/* LOGOUT */}
+              <p>
+                No transactions loaded yet.
+              </p>
 
-        <button
-          onClick={() => {
+              <p>
+                Click "Load Transactions" to view your
+                transaction history.
+              </p>
 
-            localStorage.removeItem('token')
-            localStorage.removeItem('email')
+            </div>
 
-            setIsLoggedIn(false)
+          ) : (
 
-            setShowLogin(false)
-            setShowRegister(false)
+            <div className="table-container">
 
-            setFullName('')
-            setEmail('')
-            setPassword('')
-            setPhoneNumber('')
+              <table>
 
-            setBalance(0)
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Sender</th>
+                    <th>Receiver</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
 
-            setDepositAmount('')
-            setWithdrawAmount('')
+                <tbody>
 
-            setReceiverAccountNumber('')
-            setTransferAmount('')
+                  {transactions.map((transaction) => (
 
-            setTransactions([])
-          }}
-        >
-          Logout
-        </button>
+                    <tr key={transaction.id}>
+
+                      <td>
+                        <span
+                          className={`transaction-type ${String(
+                            transaction.transactionType
+                          ).toLowerCase()}`}
+                        >
+                          {transaction.transactionType}
+                        </span>
+                      </td>
+
+                      <td className="transaction-amount">
+                        ${Number(
+                          transaction.amount
+                        ).toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+
+                      <td>
+                        {transaction.senderAccountNumber || '-'}
+                      </td>
+
+                      <td>
+                        {transaction.receiverAccountNumber || '-'}
+                      </td>
+
+                      <td>
+                        {transaction.timestamp
+                          ? new Date(
+                              transaction.timestamp
+                            ).toLocaleString()
+                          : '-'}
+                      </td>
+
+                    </tr>
+
+                  ))}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          )}
+
+        </section>
 
       </div>
     )
@@ -575,58 +689,110 @@ function App() {
 
   if (showRegister) {
     return (
-      <div>
+      <div className="auth-page">
 
-        <h1>Register</h1>
+        <div className="auth-card">
 
-        <input
-          type="text"
-          placeholder="Full Name"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-        />
+          <div className="bank-logo">
+            $
+          </div>
 
-        <br />
+          <h1>Create Account</h1>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          <p className="auth-subtitle">
+            Register for secure online banking
+          </p>
 
-        <br />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <div className="form-group">
 
-        <br />
+            <label>Full Name</label>
 
-        <input
-          type="text"
-          placeholder="Phone Number"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-        />
+            <input
+              type="text"
+              placeholder="Enter your full name"
+              value={fullName}
+              onChange={(e) =>
+                setFullName(e.target.value)
+              }
+            />
 
-        <br />
+          </div>
 
-        <button onClick={handleRegister}>
-          Register
-        </button>
 
-        <button
-          onClick={() => {
-            setShowRegister(false)
-            setShowLogin(true)
-          }}
-        >
-          Already have an account? Login
-        </button>
+          <div className="form-group">
+
+            <label>Email</label>
+
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+            />
+
+          </div>
+
+
+          <div className="form-group">
+
+            <label>Password</label>
+
+            <input
+              type="password"
+              placeholder="Minimum 6 characters"
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+            />
+
+          </div>
+
+
+          <div className="form-group">
+
+            <label>Phone Number</label>
+
+            <input
+              type="text"
+              placeholder="Enter your phone number"
+              value={phoneNumber}
+              onChange={(e) =>
+                setPhoneNumber(e.target.value)
+              }
+            />
+
+          </div>
+
+
+          <button
+            className="primary-button"
+            onClick={handleRegister}
+          >
+            Create Account
+          </button>
+
+
+          <p className="switch-page">
+
+            Already have an account?
+
+            <button
+              className="link-button"
+              onClick={() => {
+                setShowRegister(false)
+                setShowLogin(true)
+              }}
+            >
+              Login
+            </button>
+
+          </p>
+
+        </div>
 
       </div>
     )
@@ -639,40 +805,89 @@ function App() {
 
   if (showLogin) {
     return (
-      <div>
+      <div className="auth-page">
 
-        <h1>Login</h1>
+        <div className="auth-card">
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          <div className="bank-logo">
+            $
+          </div>
 
-        <br />
+          <h1>Welcome Back</h1>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <p className="auth-subtitle">
+            Login to access your banking dashboard
+          </p>
 
-        <br />
 
-        <button onClick={handleLogin}>
-          Login
-        </button>
+          <div className="form-group">
 
-        <button
-          onClick={() => {
-            setShowLogin(false)
-            setShowRegister(true)
-          }}
-        >
-          Create Account
-        </button>
+            <label>Email</label>
+
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+            />
+
+          </div>
+
+
+          <div className="form-group">
+
+            <label>Password</label>
+
+            <div className="password-wrapper">
+
+  <input
+    type={showPassword ? 'text' : 'password'}
+    placeholder="Enter your password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+  />
+
+  <button
+    type="button"
+    className="password-toggle"
+    onClick={() => setShowPassword(!showPassword)}
+    aria-label={showPassword ? 'Hide password' : 'Show password'}
+  >
+    {showPassword ? '🙈' : '👁️'}
+  </button>
+
+</div>
+
+          </div>
+
+
+          <button
+            className="primary-button"
+            onClick={handleLogin}
+          >
+            Login
+          </button>
+
+
+          <p className="switch-page">
+
+            Don't have an account?
+
+            <button
+              className="link-button"
+              onClick={() => {
+                setShowLogin(false)
+                setShowRegister(true)
+              }}
+            >
+              Register
+            </button>
+
+          </p>
+
+        </div>
 
       </div>
     )
@@ -684,29 +899,49 @@ function App() {
   // ==========================
 
   return (
-    <div>
+    <div className="home-page">
 
-      <h1>Online Banking System</h1>
+      <div className="home-content">
 
-      <p>Secure Banking Made Simple</p>
+        <div className="bank-logo home-logo">
+          $
+        </div>
 
-      <button
-        onClick={() => {
-          setShowLogin(true)
-          setShowRegister(false)
-        }}
-      >
-        Login
-      </button>
+        <h1>
+          Online Banking System
+        </h1>
 
-      <button
-        onClick={() => {
-          setShowRegister(true)
-          setShowLogin(false)
-        }}
-      >
-        Register
-      </button>
+        <p className="home-description">
+          Secure, simple and convenient banking.
+          Manage your money anytime from one place.
+        </p>
+
+
+        <div className="home-buttons">
+
+          <button
+            className="primary-button"
+            onClick={() => {
+              setShowLogin(true)
+              setShowRegister(false)
+            }}
+          >
+            Login
+          </button>
+
+          <button
+            className="secondary-button"
+            onClick={() => {
+              setShowRegister(true)
+              setShowLogin(false)
+            }}
+          >
+            Create Account
+          </button>
+
+        </div>
+
+      </div>
 
     </div>
   )
