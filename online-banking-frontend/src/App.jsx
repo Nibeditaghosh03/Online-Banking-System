@@ -3,19 +3,90 @@ import './App.css'
 
 function App() {
 
+  // ==========================
+  // STATES
+  // ==========================
+
   const [showLogin, setShowLogin] = useState(false)
+  const [showRegister, setShowRegister] = useState(false)
+
+  const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [balance, setBalance] = useState(0)
 
-  // Amount states
+  // Deposit
   const [depositAmount, setDepositAmount] = useState('')
+
+  // Withdraw
   const [withdrawAmount, setWithdrawAmount] = useState('')
+
+  // Transfer
+  const [receiverAccountNumber, setReceiverAccountNumber] = useState('')
+  const [transferAmount, setTransferAmount] = useState('')
 
 
   // ==========================
-  // LOGIN FUNCTION
+  // REGISTER
+  // ==========================
+
+  const handleRegister = async () => {
+    try {
+
+      const response = await fetch(
+        'http://localhost:8080/auth/register',
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type': 'application/json',
+          },
+
+          body: JSON.stringify({
+            fullName: fullName,
+            email: email,
+            password: password,
+            phoneNumber: phoneNumber,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Registration failed')
+      }
+
+      const data = await response.json()
+
+      console.log('Register response:', data)
+
+      alert(
+        'Registration successful! Your account number is: ' +
+        data.accountNumber
+      )
+
+      // Go to login page
+      setShowRegister(false)
+      setShowLogin(true)
+
+      // Clear fields
+      setFullName('')
+      setPassword('')
+      setPhoneNumber('')
+
+    } catch (error) {
+
+      console.error(error)
+
+      alert('Could not register user')
+    }
+  }
+
+
+  // ==========================
+  // LOGIN
   // ==========================
 
   const handleLogin = async () => {
@@ -211,6 +282,68 @@ function App() {
 
 
   // ==========================
+  // TRANSFER MONEY
+  // ==========================
+
+  const handleTransfer = async () => {
+    try {
+
+      const token = localStorage.getItem('token')
+
+      const amount = Number(transferAmount)
+
+      if (!receiverAccountNumber.trim()) {
+        alert('Please enter receiver account number')
+        return
+      }
+
+      if (amount <= 0) {
+        alert('Please enter a valid transfer amount')
+        return
+      }
+
+      const response = await fetch(
+        'http://localhost:8080/api/account/transfer',
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            receiverAccountNumber: receiverAccountNumber.trim(),
+            amount: amount,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Transfer failed')
+      }
+
+      const data = await response.json()
+
+      console.log('Transfer response:', data)
+
+      setBalance(data.balance)
+
+      setReceiverAccountNumber('')
+      setTransferAmount('')
+
+      alert('Transfer successful!')
+
+    } catch (error) {
+
+      console.error(error)
+
+      alert('Could not transfer money')
+    }
+  }
+
+
+  // ==========================
   // DASHBOARD SCREEN
   // ==========================
 
@@ -273,7 +406,27 @@ function App() {
 
         {/* TRANSFER */}
 
-        <button>
+        <input
+          type="text"
+          placeholder="Receiver account number"
+          value={receiverAccountNumber}
+          onChange={(e) =>
+            setReceiverAccountNumber(e.target.value)
+          }
+        />
+
+        <br />
+
+        <input
+          type="number"
+          placeholder="Enter transfer amount"
+          value={transferAmount}
+          onChange={(e) =>
+            setTransferAmount(e.target.value)
+          }
+        />
+
+        <button onClick={handleTransfer}>
           Transfer Money
         </button>
 
@@ -290,14 +443,88 @@ function App() {
             localStorage.removeItem('email')
 
             setIsLoggedIn(false)
-            setShowLogin(false)
 
+            setShowLogin(false)
+            setShowRegister(false)
+
+            setFullName('')
             setEmail('')
             setPassword('')
+            setPhoneNumber('')
+
             setBalance(0)
+
+            setDepositAmount('')
+            setWithdrawAmount('')
+            setReceiverAccountNumber('')
+            setTransferAmount('')
           }}
         >
           Logout
+        </button>
+
+      </div>
+    )
+  }
+
+
+  // ==========================
+  // REGISTER SCREEN
+  // ==========================
+
+  if (showRegister) {
+    return (
+      <div>
+
+        <h1>Register</h1>
+
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+        />
+
+        <br />
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <br />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <br />
+
+        <input
+          type="text"
+          placeholder="Phone Number"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
+        />
+
+        <br />
+
+        <button onClick={handleRegister}>
+          Register
+        </button>
+
+        <button
+          onClick={() => {
+            setShowRegister(false)
+            setShowLogin(true)
+          }}
+        >
+          Already have an account? Login
         </button>
 
       </div>
@@ -337,6 +564,15 @@ function App() {
           Login
         </button>
 
+        <button
+          onClick={() => {
+            setShowLogin(false)
+            setShowRegister(true)
+          }}
+        >
+          Create Account
+        </button>
+
       </div>
     )
   }
@@ -353,11 +589,21 @@ function App() {
 
       <p>Secure Banking Made Simple</p>
 
-      <button onClick={() => setShowLogin(true)}>
+      <button
+        onClick={() => {
+          setShowLogin(true)
+          setShowRegister(false)
+        }}
+      >
         Login
       </button>
 
-      <button>
+      <button
+        onClick={() => {
+          setShowRegister(true)
+          setShowLogin(false)
+        }}
+      >
         Register
       </button>
 
