@@ -1,4 +1,11 @@
 /* ==============================
+   IMPORT FONT
+============================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+
+/* ==============================
    GLOBAL
 ============================== */
 
@@ -11,14 +18,14 @@ body,
 #root {
   margin: 0;
   padding: 0;
+  min-height: 100%;
   width: 100%;
-  min-height: 100vh;
 }
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f4f7fb;
-  color: #1e293b;
+  font-family: 'Inter', sans-serif;
+  background: #f4f7fc;
+  color: #172554;
 }
 
 button,
@@ -28,47 +35,109 @@ input {
 
 
 /* ==============================
-   HOME PAGE
+   GENERAL BUTTON
 ============================== */
 
-.home-page {
+button {
+  border: none;
+  outline: none;
+
+  padding: 12px 24px;
+
+  border-radius: 8px;
+
+  background: #2563eb;
+  color: white;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+button:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+
+/* ==============================
+   PAGE
+============================== */
+
+.page {
+  width: 100%;
   min-height: 100vh;
 
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   padding: 30px 20px;
 
-  background: #f4f7fb;
+  background: #f4f7fc;
 }
 
-.home-content {
+
+/* ==============================
+   HOME CARD
+============================== */
+
+.home-card {
   width: 100%;
   max-width: 750px;
 
-  padding: 60px 40px;
+  padding: 60px 50px;
 
-  background: #ffffff;
+  background: white;
 
   border-radius: 20px;
 
   text-align: center;
 
   box-shadow:
-    0 15px 40px rgba(15, 23, 42, 0.1);
+    0 15px 40px rgba(15, 23, 42, 0.08);
+}
+
+.home-card h1 {
+  margin: 18px 0 10px;
+
+  font-size: 42px;
+
+  color: #1e3a8a;
+}
+
+.home-card p {
+  max-width: 560px;
+
+  margin: 0 auto 30px;
+
+  line-height: 1.7;
+
+  font-size: 17px;
+
+  color: #64748b;
 }
 
 
 /* ==============================
-   BANK LOGO
+   LOGO
 ============================== */
 
-.bank-logo {
+.logo-circle {
   width: 70px;
   height: 70px;
 
-  margin: 0 auto 20px;
+  margin: 0 auto;
 
   display: flex;
   align-items: center;
@@ -80,97 +149,10 @@ input {
   color: white;
 
   font-size: 30px;
-  font-weight: bold;
+  font-weight: 700;
 
   box-shadow:
-    0 8px 18px rgba(37, 99, 235, 0.25);
-}
-
-.home-logo {
-  margin-bottom: 15px;
-}
-
-
-/* ==============================
-   HOME TEXT
-============================== */
-
-.home-content h1 {
-  margin: 5px 0 5px;
-
-  color: #1e3a8a;
-
-  font-size: 42px;
-}
-
-.home-description {
-  max-width: 550px;
-
-  margin: 0 auto 30px;
-
-  color: #64748b;
-
-  font-size: 17px;
-  line-height: 1.7;
-}
-
-
-/* ==============================
-   HOME BUTTONS
-============================== */
-
-.home-buttons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  gap: 15px;
-
-  flex-wrap: wrap;
-}
-
-
-/* ==============================
-   GENERAL BUTTON
-============================== */
-
-button {
-  border: none;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  font-size: 15px;
-  font-weight: 600;
-
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-button:hover {
-  transform: translateY(-1px);
-}
-
-
-/* ==============================
-   PRIMARY BUTTON
-============================== */
-
-.primary-button {
-  padding: 13px 28px;
-
-  background: #2563eb;
-  color: white;
-}
-
-.primary-button:hover {
-  background: #1d4ed8;
-
-  box-shadow:
-    0 5px 12px rgba(37, 99, 235, 0.2);
+    0 8px 20px rgba(37, 99, 235, 0.25);
 }
 
 
@@ -179,38 +161,24 @@ button:hover {
 ============================== */
 
 .secondary-button {
-  padding: 12px 28px;
+  margin-left: 10px;
 
   background: white;
+
   color: #2563eb;
 
-  border: 1px solid #2563eb;
+  border: 1.5px solid #2563eb;
 }
 
 .secondary-button:hover {
   background: #eff6ff;
+
+  color: #1d4ed8;
 }
 
 
 /* ==============================
-   AUTH PAGE
-============================== */
-
-.auth-page {
-  min-height: 100vh;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  padding: 35px 20px;
-
-  background: #f4f7fb;
-}
-
-
-/* ==============================
-   LOGIN / REGISTER CARD
+   AUTH CARD
 ============================== */
 
 .auth-card {
@@ -221,7 +189,7 @@ button:hover {
 
   background: white;
 
-  border-radius: 18px;
+  border-radius: 20px;
 
   text-align: center;
 
@@ -230,88 +198,107 @@ button:hover {
 }
 
 .auth-card h1 {
-  margin: 5px 0;
+  margin: 18px 0 5px;
 
   color: #1e3a8a;
 
-  font-size: 42px;
+  font-size: 38px;
 }
 
-.auth-subtitle {
-  margin: 0 0 35px;
+.auth-card > p {
+  margin: 0 0 30px;
 
   color: #64748b;
-
-  font-size: 15px;
 }
 
 
 /* ==============================
-   FORM
+   AUTH FORM
 ============================== */
 
-.form-group {
+.auth-card form {
   width: 100%;
-
-  margin-bottom: 22px;
-
-  text-align: left;
 }
 
-.form-group label {
+
+/* ==============================
+   FORM LABELS
+============================== */
+
+.auth-card label {
   display: block;
 
-  margin-bottom: 10px;
+  width: 100%;
 
-  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 8px;
 
-  color: #172554;
+  text-align: left;
 
   font-size: 14px;
   font-weight: 600;
+
+  color: #172554;
 }
 
 
 /* ==============================
-   INPUT
+   AUTH INPUTS
+
+   IMPORTANT:
+   Inputs are inside <form>,
+   therefore use .auth-card form input
 ============================== */
 
-.form-group input {
+.auth-card form input {
+  display: block;
+
   width: 100%;
-  height: 44px;
+  height: 48px;
+
+  margin: 0;
 
   padding: 0 14px;
 
   border: 1px solid #cbd5e1;
+
   border-radius: 8px;
 
-  background: white;
+  outline: none;
 
-  color: #1e293b;
+  background: #ffffff;
+
+  color: #172554;
 
   font-size: 15px;
 
-  outline: none;
+  line-height: normal;
 
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 
-.form-group input:focus {
+.auth-card form input:hover {
+  border-color: #94a3b8;
+}
+
+.auth-card form input:focus {
   border-color: #2563eb;
 
   box-shadow:
     0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-.form-group input::placeholder {
-  color: #64748b;
+.auth-card form input::placeholder {
+  color: #94a3b8;
+
+  opacity: 1;
 }
 
 
 /* ==============================
-   PASSWORD EYE
+   PASSWORD WRAPPER
 ============================== */
 
 .password-wrapper {
@@ -323,98 +310,119 @@ button:hover {
 .password-wrapper input {
   width: 100%;
 
-  padding-right: 50px;
+  padding-right: 50px !important;
 }
 
 
-/* IMPORTANT:
-   overrides normal button styling
-   so eye stays inside input
-*/
+/* ==============================
+   PASSWORD EYE
+============================== */
 
-.password-toggle {
+.eye-icon {
   position: absolute;
 
-  right: 12px;
   top: 50%;
+  right: 15px;
 
   transform: translateY(-50%);
 
-  width: 32px;
-  height: 32px;
-
-  margin: 0;
-  padding: 0;
-
   display: flex;
-  justify-content: center;
   align-items: center;
-
-  border: none;
-
-  background: transparent;
-
-  font-size: 17px;
+  justify-content: center;
 
   cursor: pointer;
 
-  box-shadow: none;
-}
+  font-size: 17px;
 
-.password-toggle:hover {
-  background: #f1f5f9;
+  line-height: 1;
 
-  transform: translateY(-50%);
+  user-select: none;
 
-  box-shadow: none;
+  z-index: 2;
 }
 
 
 /* ==============================
-   AUTH MAIN BUTTON
+   FULL BUTTON
 ============================== */
 
-.auth-card > .primary-button {
+.full-button {
   width: 100%;
 
-  margin-top: 2px;
+  margin-top: 24px;
 }
 
 
 /* ==============================
-   LOGIN / REGISTER SWITCH
+   LOGIN / REGISTER LINK
 ============================== */
 
-.switch-page {
-  margin-top: 20px;
-
-  color: #64748b;
-
-  font-size: 14px;
-}
-
-.link-button {
-  margin-left: 4px;
-  padding: 0;
-
-  border: none;
-
-  background: transparent;
-
+.auth-card .link {
   color: #2563eb;
 
-  font-size: 14px;
   font-weight: 600;
 
   cursor: pointer;
 }
 
-.link-button:hover {
-  color: #1d4ed8;
-
+.auth-card .link:hover {
   text-decoration: underline;
+}
 
-  transform: none;
+
+/* Paragraph AFTER form */
+
+.auth-card form + p {
+  margin-top: 24px;
+  margin-bottom: 0;
+
+  font-size: 14px;
+
+  color: #64748b;
+}
+
+
+/* ==============================
+   CHROME AUTOFILL
+
+   This is OUTSIDE media query.
+============================== */
+
+.auth-card input:-webkit-autofill,
+.auth-card input:-webkit-autofill:hover,
+.auth-card input:-webkit-autofill:focus,
+.auth-card input:-webkit-autofill:active {
+  -webkit-text-fill-color: #172554 !important;
+
+  -webkit-box-shadow:
+    0 0 0 1000px #ffffff inset !important;
+
+  box-shadow:
+    0 0 0 1000px #ffffff inset !important;
+
+  caret-color: #172554;
+
+  border: 1px solid #cbd5e1 !important;
+
+  border-radius: 8px !important;
+
+  font-family: 'Inter', sans-serif !important;
+
+  font-size: 15px !important;
+
+  transition:
+    background-color 5000s ease-in-out 0s;
+}
+
+
+/* Autofill focus */
+
+.auth-card input:-webkit-autofill:focus {
+  border-color: #2563eb !important;
+
+  box-shadow:
+    0 0 0 1000px #ffffff inset,
+    0 0 0 3px rgba(37, 99, 235, 0.12) !important;
 }
 
 
@@ -424,12 +432,11 @@ button:hover {
 
 .dashboard {
   width: 100%;
-
   min-height: 100vh;
 
-  padding: 35px;
+  padding: 30px 6% 60px;
 
-  background: #f4f7fb;
+  background: #f4f7fc;
 }
 
 
@@ -439,52 +446,27 @@ button:hover {
 
 .dashboard-header {
   width: 100%;
-  max-width: 1200px;
-
-  margin: 0 auto 30px;
-
-  padding: 20px 25px;
 
   display: flex;
+
   justify-content: space-between;
   align-items: center;
 
-  background: white;
-
-  border-radius: 14px;
-
-  box-shadow:
-    0 8px 25px rgba(15, 23, 42, 0.07);
+  margin-bottom: 25px;
 }
 
 .dashboard-header h1 {
-  margin: 0;
+  margin: 0 0 5px;
 
   color: #1e3a8a;
 
-  font-size: 30px;
+  font-size: 32px;
 }
 
-.dashboard-subtitle {
-  margin: 5px 0 0;
+.dashboard-header p {
+  margin: 0;
 
   color: #64748b;
-}
-
-
-/* ==============================
-   LOGOUT
-============================== */
-
-.logout-button {
-  padding: 11px 22px;
-
-  background: #ef4444;
-  color: white;
-}
-
-.logout-button:hover {
-  background: #dc2626;
 }
 
 
@@ -494,125 +476,130 @@ button:hover {
 
 .balance-card {
   width: 100%;
-  max-width: 1200px;
-
-  margin: 0 auto 30px;
 
   padding: 35px;
 
-  background: #2563eb;
-  color: white;
-
-  border-radius: 16px;
+  border-radius: 18px;
 
   text-align: center;
 
-  box-shadow:
-    0 12px 30px rgba(37, 99, 235, 0.2);
-}
-
-.balance-label {
-  margin: 0;
-
-  font-size: 16px;
-
-  opacity: 0.9;
-}
-
-.balance-amount {
-  margin: 12px 0 20px;
+  background: #1e3a8a;
 
   color: white;
 
-  font-size: 42px;
+  box-shadow:
+    0 12px 30px rgba(30, 58, 138, 0.15);
 }
 
-.balance-button {
-  padding: 11px 22px;
+.balance-card p {
+  margin: 5px 0;
+
+  color: #dbeafe;
+}
+
+.balance-card h1 {
+  margin: 10px 0;
+
+  color: white;
+
+  font-size: 44px;
+}
+
+.balance-card button {
+  margin-top: 15px;
 
   background: white;
-  color: #2563eb;
 
-  border: none;
+  color: #1e3a8a;
 }
 
-.balance-button:hover {
+.balance-card button:hover {
   background: #eff6ff;
 }
 
 
 /* ==============================
-   BANKING SERVICES
+   SECTION TITLE
 ============================== */
 
-.actions-section {
-  width: 100%;
-  max-width: 1200px;
+.section-title {
+  margin: 32px 0 18px;
 
-  margin: 0 auto 30px;
-}
+  text-align: center;
 
-.actions-section > h2 {
-  margin-bottom: 20px;
-
-  color: #1e3a8a;
+  color: #172554;
 }
 
 
 /* ==============================
-   ACTION GRID
+   SERVICES
 ============================== */
 
-.action-grid {
+.services {
+  width: 100%;
+
   display: grid;
 
   grid-template-columns:
-    repeat(3, 1fr);
+    repeat(3, minmax(0, 1fr));
 
   gap: 20px;
 }
 
 
 /* ==============================
-   ACTION CARD
+   SERVICE CARD
 ============================== */
 
-.action-card {
-  padding: 25px;
+.service-card {
+  padding: 28px 25px;
 
   background: white;
 
-  border-radius: 14px;
-
-  box-shadow:
-    0 8px 25px rgba(15, 23, 42, 0.07);
+  border-radius: 16px;
 
   text-align: center;
+
+  box-shadow:
+    0 8px 25px rgba(15, 23, 42, 0.06);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.action-card h3 {
-  margin: 10px 0;
+.service-card:hover {
+  transform: translateY(-3px);
 
-  color: #1e3a8a;
-
-  font-size: 21px;
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.09);
 }
 
-.action-card p {
-  min-height: 40px;
+.service-card h2 {
+  margin: 12px 0;
+
+  color: #172554;
+}
+
+.service-card p {
+  margin-bottom: 22px;
 
   color: #64748b;
-
-  font-size: 14px;
 }
 
-.action-icon {
-  width: 50px;
-  height: 50px;
 
-  margin: auto;
+/* ==============================
+   SERVICE ICON
+============================== */
+
+.service-icon {
+  width: 52px;
+  height: 52px;
+
+  margin: 0 auto;
 
   display: flex;
+
   justify-content: center;
   align-items: center;
 
@@ -622,78 +609,81 @@ button:hover {
 
   color: #2563eb;
 
-  font-size: 25px;
-  font-weight: bold;
+  font-size: 27px;
 }
 
 
 /* ==============================
-   ACTION INPUT
+   SERVICE INPUTS
 ============================== */
 
-.action-card input {
+.service-card input {
   width: 100%;
-  height: 43px;
+  height: 46px;
 
-  margin: 6px 0;
+  padding: 0 14px;
 
-  padding: 0 12px;
+  margin-bottom: 12px;
 
   border: 1px solid #cbd5e1;
-  border-radius: 7px;
+
+  border-radius: 8px;
 
   outline: none;
+
+  background: white;
+
+  color: #172554;
 
   font-size: 14px;
 }
 
-.action-card input:focus {
+.service-card input:focus {
   border-color: #2563eb;
 
   box-shadow:
     0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+.service-card input::placeholder {
+  color: #94a3b8;
+}
+
 
 /* ==============================
-   ACTION BUTTON
+   SERVICE BUTTON
 ============================== */
 
-.action-card button {
+.service-card button {
   width: 100%;
 
-  margin-top: 12px;
-
-  padding: 11px;
-
-  background: #2563eb;
-  color: white;
-}
-
-.action-card button:hover {
-  background: #1d4ed8;
+  margin-top: 4px;
 }
 
 
 /* ==============================
-   TRANSACTIONS
+   TRANSACTION SECTION
 ============================== */
 
 .transaction-section {
   width: 100%;
-  max-width: 1200px;
 
-  margin: 0 auto;
+  margin-top: 30px;
 
-  padding: 25px;
+  padding: 28px;
 
   background: white;
 
-  border-radius: 14px;
+  border-radius: 16px;
 
   box-shadow:
-    0 8px 25px rgba(15, 23, 42, 0.07);
+    0 8px 25px rgba(15, 23, 42, 0.06);
 }
+
+
+/* ==============================
+   TRANSACTION HEADER
+============================== */
 
 .transaction-header {
   display: flex;
@@ -707,26 +697,15 @@ button:hover {
 }
 
 .transaction-header h2 {
-  margin: 0;
+  margin: 0 0 6px;
 
-  color: #1e3a8a;
+  color: #172554;
 }
 
 .transaction-header p {
-  margin: 5px 0 0;
+  margin: 0;
 
   color: #64748b;
-}
-
-.transaction-header button {
-  padding: 11px 20px;
-
-  background: #2563eb;
-  color: white;
-}
-
-.transaction-header button:hover {
-  background: #1d4ed8;
 }
 
 
@@ -746,6 +725,10 @@ button:hover {
   color: #64748b;
 }
 
+.empty-transactions p {
+  margin: 5px 0;
+}
+
 
 /* ==============================
    TABLE
@@ -760,69 +743,38 @@ button:hover {
 table {
   width: 100%;
 
+  margin-top: 10px;
+
   border-collapse: collapse;
 }
 
-th,
-td {
-  padding: 13px;
-
-  border-bottom: 1px solid #e2e8f0;
-
-  text-align: center;
-
-  white-space: nowrap;
+thead {
+  background: #eff6ff;
 }
 
 th {
-  background: #eff6ff;
+  padding: 14px;
+
+  text-align: left;
 
   color: #1e3a8a;
 
-  font-weight: 600;
+  font-size: 14px;
 }
 
 td {
+  padding: 14px;
+
+  border-bottom:
+    1px solid #e2e8f0;
+
   color: #475569;
+
+  font-size: 14px;
 }
 
 tbody tr:hover {
   background: #f8fafc;
-}
-
-.transaction-amount {
-  font-weight: 600;
-}
-
-
-/* ==============================
-   TRANSACTION TYPE
-============================== */
-
-.transaction-type {
-  display: inline-block;
-
-  padding: 5px 10px;
-
-  border-radius: 20px;
-
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.transaction-type.deposit {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.transaction-type.withdraw {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-.transaction-type.transfer {
-  background: #dbeafe;
-  color: #1d4ed8;
 }
 
 
@@ -832,12 +784,13 @@ tbody tr:hover {
 
 @media (max-width: 900px) {
 
-  .action-grid {
+  .services {
     grid-template-columns: 1fr;
   }
 
   .dashboard {
-    padding: 20px;
+    padding-left: 25px;
+    padding-right: 25px;
   }
 }
 
@@ -848,55 +801,73 @@ tbody tr:hover {
 
 @media (max-width: 600px) {
 
-  .home-page,
-  .auth-page {
+  .page {
     padding: 20px 15px;
   }
 
-  .home-content {
+
+  .home-card {
     padding: 40px 20px;
   }
 
-  .home-content h1 {
+
+  .home-card h1 {
     font-size: 32px;
   }
 
-  .auth-card {
-    padding: 30px 20px;
+
+  .secondary-button {
+    margin-left: 0;
+    margin-top: 10px;
   }
+
+
+  .auth-card {
+    padding: 30px 22px;
+  }
+
 
   .auth-card h1 {
     font-size: 32px;
   }
 
-  .bank-logo {
-    width: 60px;
-    height: 60px;
-
-    font-size: 26px;
-  }
 
   .dashboard {
-    padding: 15px;
+    padding:
+      20px 15px 40px;
   }
+
 
   .dashboard-header {
     flex-direction: column;
 
-    text-align: center;
+    align-items: flex-start;
 
     gap: 15px;
   }
 
-  .balance-amount {
-    font-size: 34px;
+
+  .dashboard-header button {
+    width: 100%;
   }
+
+
+  .balance-card {
+    padding: 28px 20px;
+  }
+
+
+  .balance-card h1 {
+    font-size: 36px;
+  }
+
 
   .transaction-header {
     flex-direction: column;
 
-    align-items: stretch;
+    align-items: flex-start;
   }
+
 
   .transaction-header button {
     width: 100%;
