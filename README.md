@@ -6,6 +6,14 @@ The application allows users to securely create an account, log in, manage their
 
 ---
 
+## 🚀 Live Demo
+
+🌐 **Frontend:** https://online-banking-system-zeta.vercel.app
+
+⚙️ **Backend:** Deployed on Render
+
+---
+
 ## ✨ Features
 
 - User Registration
@@ -172,7 +180,7 @@ online-banking-system/
 │
 ├── pom.xml
 └── README.md
-
+```
 ---
 
 ## 📸 Screenshots
