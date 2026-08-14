@@ -56,25 +56,23 @@ function App() {
         alert('Password must contain at least 6 characters')
         return
       }
-
       const response = await fetch(
-        'http://localhost:8080/auth/register',
-        {
-          method: 'POST',
+      'https://online-banking-system-6wey.onrender.com/auth/register',
+      {
+        method: 'POST',
 
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        headers: {
+          'Content-Type': 'application/json',
+        },
 
-          body: JSON.stringify({
-            fullName: fullName.trim(),
-            email: registerEmail.trim(),
-            password: registerPassword,
-            phoneNumber: phoneNumber.trim(),
-          }),
-        }
-      )
-
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: registerEmail.trim(),
+          password: registerPassword,
+          phoneNumber: phoneNumber.trim(),
+        }),
+      }
+    )
       if (!response.ok) {
 
         let message = 'Registration failed'
@@ -128,7 +126,7 @@ function App() {
       }
 
       const response = await fetch(
-        'http://localhost:8080/auth/login',
+        'https://online-banking-system-6wey.onrender.com/auth/login',
         {
           method: 'POST',
 
@@ -212,7 +210,7 @@ function App() {
       }
 
       const response = await fetch(
-        'http://localhost:8080/api/account/balance',
+        'https://online-banking-system-6wey.onrender.com/api/account/balance',
         {
           method: 'GET',
 
@@ -286,7 +284,7 @@ function App() {
       }
 
       const response = await fetch(
-        'http://localhost:8080/api/account/deposit',
+        'https://online-banking-system-6wey.onrender.com/api/account/deposit',
         {
           method: 'POST',
 
@@ -386,7 +384,7 @@ function App() {
       }
 
       const response = await fetch(
-        'http://localhost:8080/api/account/withdraw',
+        'https://online-banking-system-6wey.onrender.com/api/account/withdraw',
         {
           method: 'POST',
 
@@ -499,7 +497,7 @@ function App() {
       }
 
       const response = await fetch(
-        'http://localhost:8080/api/account/transfer',
+        'https://online-banking-system-6wey.onrender.com/api/account/transfer',
         {
           method: 'POST',
 
@@ -592,7 +590,7 @@ function App() {
       }
 
       const response = await fetch(
-        'http://localhost:8080/api/account/transactions',
+        'https://online-banking-system-6wey.onrender.com/api/account/transactions',
         {
           method: 'GET',
 
