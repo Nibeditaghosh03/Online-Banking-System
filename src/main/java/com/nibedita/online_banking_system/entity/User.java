@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.List;
+import java.util.ArrayList;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -15,6 +18,9 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+private List<BankAccount> bankAccounts = new ArrayList<>();
 
     @Column(nullable = false)
     private String fullName;
@@ -32,11 +38,7 @@ public class User {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false, unique = true)
-    private String accountNumber;
-
-    @Column(nullable = false)
-    private Double balance = Double.valueOf(0.0);
+   
 
     
 
@@ -46,4 +48,7 @@ public class User {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    
 }
+

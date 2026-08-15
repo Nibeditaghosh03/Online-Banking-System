@@ -1,242 +1,680 @@
 package com.nibedita.online_banking_system.service;
 
 import com.nibedita.online_banking_system.dto.RegisterRequest;
-import com.nibedita.online_banking_system.dto.WithdrawRequest;
-import com.nibedita.online_banking_system.entity.User;
-import com.nibedita.online_banking_system.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import com.nibedita.online_banking_system.dto.LoginRequest;
-import java.util.List;
-import com.nibedita.online_banking_system.dto.BalanceResponse;
-import com.nibedita.online_banking_system.entity.Role;
+import com.nibedita.online_banking_system.dto.WithdrawRequest;
 import com.nibedita.online_banking_system.dto.DepositRequest;
 import com.nibedita.online_banking_system.dto.TransferRequest;
-import org.springframework.transaction.annotation.Transactional;
-import com.nibedita.online_banking_system.repository.TransactionRepository;
+import com.nibedita.online_banking_system.dto.BalanceResponse;
+import com.nibedita.online_banking_system.dto.TransactionResponse;
+
+import com.nibedita.online_banking_system.entity.User;
+import com.nibedita.online_banking_system.entity.BankAccount;
+import com.nibedita.online_banking_system.entity.Role;
 import com.nibedita.online_banking_system.entity.Transaction;
 import com.nibedita.online_banking_system.entity.TransactionType;
+
+import com.nibedita.online_banking_system.repository.UserRepository;
+import com.nibedita.online_banking_system.repository.BankAccountRepository;
+import com.nibedita.online_banking_system.repository.TransactionRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
-import com.nibedita.online_banking_system.dto.TransactionResponse;
+import java.util.List;
 
 
 @Service
 public class UserService {
+
     @Autowired
-private PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
+    private BankAccountRepository bankAccountRepository;
+
+    @Autowired
     private TransactionRepository transactionRepository;
 
+
+    // =========================================================
+    // REGISTER USER
+    // =========================================================
+
+    @Transactional
     public User registerUser(RegisterRequest request) {
 
+        // 1. Check if email already exists
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already exists!");
         }
 
+        // 2. Create User
         User user = new User();
 
-       user.setFullName(request.getFullName());
-       user.setEmail(request.getEmail());
-      user.setPassword(passwordEncoder.encode(request.getPassword()));
-       user.setPhoneNumber(request.getPhoneNumber());
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
 
-user.setBalance(Double.valueOf(0.0));
-user.setActive(true);
-user.setRole(Role.USER);
+        // Password is stored as a BCrypt hash
+        user.setPassword(
+                passwordEncoder.encode(request.getPassword())
+        );
 
-String accountNumber = "ACC" + System.currentTimeMillis();
-user.setAccountNumber(accountNumber);
+        user.setPhoneNumber(request.getPhoneNumber());
 
-System.out.println("Registering user:");
-System.out.println("Name: " + user.getFullName());
-System.out.println("Email: " + user.getEmail());
-System.out.println("Phone: " + user.getPhoneNumber());
-System.out.println("Account: " + user.getAccountNumber());
-System.out.println("Balance: " + user.getBalance());
-System.out.println("Active: " + user.getActive());
-System.out.println("Role: " + user.getRole());
+        user.setActive(true);
+        user.setRole(Role.USER);
 
-return userRepository.save(user);
+
+        // =====================================================
+        // CREATE FIRST BANK ACCOUNT
+        // =====================================================
+
+        BankAccount bankAccount = new BankAccount();
+
+        // Generate unique account number
+        bankAccount.setAccountNumber(
+                generateAccountNumber()
+        );
+
+        // Demo IFSC for FINNOVA
+        bankAccount.setIfscCode(
+                "FINN0001234"
+        );
+
+        // First account is a Savings Account
+        bankAccount.setAccountType(
+                "SAVINGS"
+        );
+
+        // New account starts with zero balance
+        bankAccount.setBalance(0.0);
+
+        // Account is active
+        bankAccount.setStatus("ACTIVE");
+
+        // Account creation time
+        bankAccount.setCreatedAt(
+                LocalDateTime.now()
+        );
+
+
+        // =====================================================
+        // CONNECT BANK ACCOUNT WITH USER
+        // =====================================================
+
+        bankAccount.setUser(user);
+
+        user.getBankAccounts().add(bankAccount);
+
+
+        // =====================================================
+        // SAVE USER
+        // =====================================================
+
+        User savedUser = userRepository.save(user);
+
+
+        // =====================================================
+        // DEBUG INFORMATION
+        // =====================================================
+        // We will remove these logs later for production.
+
+        System.out.println("User registered successfully");
+        System.out.println("Name: " + savedUser.getFullName());
+        System.out.println("Email: " + savedUser.getEmail());
+        System.out.println(
+                "Account: "
+                + bankAccount.getAccountNumber()
+        );
+        System.out.println(
+                "IFSC: "
+                + bankAccount.getIfscCode()
+        );
+        System.out.println(
+                "Account Type: "
+                + bankAccount.getAccountType()
+        );
+
+
+        return savedUser;
     }
+
+
+    // =========================================================
+    // GENERATE ACCOUNT NUMBER
+    // =========================================================
+
+    private String generateAccountNumber() {
+
+        String accountNumber;
+
+        do {
+
+            accountNumber =
+                    "FNX"
+                    + System.currentTimeMillis();
+
+        } while (
+                bankAccountRepository
+                        .existsByAccountNumber(accountNumber)
+        );
+
+        return accountNumber;
+    }
+
+
+    // =========================================================
+    // LOGIN USER
+    // =========================================================
+
     public User loginUser(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+        User user =
+                userRepository
+                        .findByEmail(request.getEmail())
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "User not found!"
+                                )
+                        );
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password!");
+
+        // Verify password
+        if (
+                !passwordEncoder.matches(
+                        request.getPassword(),
+                        user.getPassword()
+                )
+        ) {
+
+            throw new RuntimeException(
+                    "Invalid password!"
+            );
         }
 
+
+        // Check whether account/user is active
+        if (!user.getActive()) {
+
+            throw new RuntimeException(
+                    "User account is inactive!"
+            );
+        }
+
+
         return user;
-}
+    }
 
-public List<User> getAllUsers() {
-    return userRepository.findAll();
-}
 
-public BalanceResponse getBalance(String email) {
+    // =========================================================
+    // GET ALL USERS
+    // =========================================================
 
-    User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+    public List<User> getAllUsers() {
 
-    return new BalanceResponse(
-            user.getAccountNumber(),
-            user.getBalance()
-    );
-}
-@Transactional
-public BalanceResponse deposit(String email, DepositRequest request) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findAll();
+    }
 
-        double amount = request.getAmount();
-        if (amount <= 0) {
-    throw new RuntimeException(
-        "Deposit amount must be greater than zero"
-    );
-}
-        user.setBalance(user.getBalance() + amount);
-        userRepository.save(user);
 
-        Transaction transaction = new Transaction();
+    // =========================================================
+    // GET USER ACCOUNTS
+    // =========================================================
 
-        transaction.setTransactionType(TransactionType.DEPOSIT);
-        transaction.setAmount(amount);
-        transaction.setReceiverAccountNumber(user.getAccountNumber());
-        transaction.setTimestamp(LocalDateTime.now());
+    public List<BankAccount> getUserAccounts(String email) {
 
-        transactionRepository.save(transaction);
+        User user =
+                userRepository
+                        .findByEmail(email)
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "User not found"
+                                )
+                        );
 
-       return new BalanceResponse(
-        user.getAccountNumber(),
-        user.getBalance()
-);
-}
+        return bankAccountRepository.findByUser(user);
+    }
+
+
+    // =========================================================
+    // GET BALANCE
+    // =========================================================
+
+    public BalanceResponse getBalance(String email) {
+
+        User user =
+                userRepository
+                        .findByEmail(email)
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "User not found"
+                                )
+                        );
+
+
+        // Get user's accounts
+        List<BankAccount> accounts =
+                bankAccountRepository.findByUser(user);
+
+
+        if (accounts.isEmpty()) {
+
+            throw new RuntimeException(
+                    "No bank account found"
+            );
+        }
+
+
+        // For now use the first account.
+        // Later we will allow the user to select
+        // a specific account.
+        BankAccount account =
+                accounts.get(0);
+
+
+        return new BalanceResponse(
+                account.getAccountNumber(),
+                account.getBalance()
+        );
+    }
+
+
+    // =========================================================
+    // DEPOSIT
+    // =========================================================
+
     @Transactional
-    public BalanceResponse withdraw(String email, WithdrawRequest request) {
+    public BalanceResponse deposit(
+            String email,
+            DepositRequest request
+    ) {
 
-    User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+        User user =
+                userRepository
+                        .findByEmail(email)
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "User not found"
+                                )
+                        );
 
-    double amount = request.getAmount();
 
-    if (amount <= 0) {
-        throw new RuntimeException("Withdrawal amount must be greater than zero");
-    }
+        List<BankAccount> accounts =
+                bankAccountRepository.findByUser(user);
 
-   if (user.getBalance() < amount) {
-    throw new RuntimeException(
-        "Insufficient balance"
-    );
-}
 
-    user.setBalance(user.getBalance() - amount);
+        if (accounts.isEmpty()) {
 
-    userRepository.save(user);
-    Transaction transaction = new Transaction();
-    transaction.setTransactionType(TransactionType.WITHDRAW);
-    transaction.setAmount(amount);
-    transaction.setSenderAccountNumber(user.getAccountNumber());
-    transaction.setTimestamp(LocalDateTime.now());
+            throw new RuntimeException(
+                    "No bank account found"
+            );
+        }
 
-    transactionRepository.save(transaction);
 
-    return new BalanceResponse(
-            user.getAccountNumber(),
-            user.getBalance()
-    );
-}
+        BankAccount account =
+                accounts.get(0);
 
-@Transactional
-public BalanceResponse transfer(String senderEmail, TransferRequest request) {
 
-    
-    User sender = userRepository.findByEmail(senderEmail)
-            .orElseThrow(() -> new RuntimeException("Sender not found"));
+        double amount =
+                request.getAmount();
 
-    
-    User receiver = userRepository.findByAccountNumber(
-            request.getReceiverAccountNumber()
-    ).orElseThrow(() -> new RuntimeException("Receiver account not found"));
 
-    double amount = request.getAmount();
+        // Amount validation
+        if (amount <= 0) {
 
-    
-    if (amount <= 0) {
-        throw new RuntimeException(
-                "Transfer amount must be greater than zero"
+            throw new RuntimeException(
+                    "Deposit amount must be greater than zero"
+            );
+        }
+
+
+        // Update balance
+        account.setBalance(
+                account.getBalance() + amount
+        );
+
+        bankAccountRepository.save(account);
+
+
+        // Create transaction
+        Transaction transaction =
+                new Transaction();
+
+        transaction.setTransactionType(
+                TransactionType.DEPOSIT
+        );
+
+        transaction.setAmount(amount);
+
+        transaction.setReceiverAccountNumber(
+                account.getAccountNumber()
+        );
+
+        transaction.setTimestamp(
+                LocalDateTime.now()
+        );
+
+
+        transactionRepository.save(
+                transaction
+        );
+
+
+        return new BalanceResponse(
+                account.getAccountNumber(),
+                account.getBalance()
         );
     }
 
-    
-    if (sender.getAccountNumber().equals(receiver.getAccountNumber())) {
-        throw new RuntimeException(
-                "Cannot transfer money to your own account"
+
+    // =========================================================
+    // WITHDRAW
+    // =========================================================
+
+    @Transactional
+    public BalanceResponse withdraw(
+            String email,
+            WithdrawRequest request
+    ) {
+
+        User user =
+                userRepository
+                        .findByEmail(email)
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "User not found"
+                                )
+                        );
+
+
+        List<BankAccount> accounts =
+                bankAccountRepository.findByUser(user);
+
+
+        if (accounts.isEmpty()) {
+
+            throw new RuntimeException(
+                    "No bank account found"
+            );
+        }
+
+
+        BankAccount account =
+                accounts.get(0);
+
+
+        double amount =
+                request.getAmount();
+
+
+        // Amount validation
+        if (amount <= 0) {
+
+            throw new RuntimeException(
+                    "Withdrawal amount must be greater than zero"
+            );
+        }
+
+
+        // Balance validation
+        if (account.getBalance() < amount) {
+
+            throw new RuntimeException(
+                    "Insufficient balance"
+            );
+        }
+
+
+        // Update balance
+        account.setBalance(
+                account.getBalance() - amount
+        );
+
+        bankAccountRepository.save(account);
+
+
+        // Create transaction
+        Transaction transaction =
+                new Transaction();
+
+        transaction.setTransactionType(
+                TransactionType.WITHDRAW
+        );
+
+        transaction.setAmount(amount);
+
+        transaction.setSenderAccountNumber(
+                account.getAccountNumber()
+        );
+
+        transaction.setTimestamp(
+                LocalDateTime.now()
+        );
+
+
+        transactionRepository.save(
+                transaction
+        );
+
+
+        return new BalanceResponse(
+                account.getAccountNumber(),
+                account.getBalance()
         );
     }
 
-    
-    if (sender.getBalance() < amount) {
-        throw new RuntimeException(
-                "Insufficient balance"
+
+    // =========================================================
+    // TRANSFER MONEY
+    // =========================================================
+
+    @Transactional
+    public BalanceResponse transfer(
+            String senderEmail,
+            TransferRequest request
+    ) {
+
+        // Find sender
+        User sender =
+                userRepository
+                        .findByEmail(senderEmail)
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Sender not found"
+                                )
+                        );
+
+
+        // Get sender accounts
+        List<BankAccount> senderAccounts =
+                bankAccountRepository.findByUser(sender);
+
+
+        if (senderAccounts.isEmpty()) {
+
+            throw new RuntimeException(
+                    "Sender bank account not found"
+            );
+        }
+
+
+        // For now use first account
+        BankAccount senderAccount =
+                senderAccounts.get(0);
+
+
+        // Find receiver
+        BankAccount receiverAccount =
+                bankAccountRepository
+                        .findByAccountNumber(
+                                request.getReceiverAccountNumber()
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Receiver account not found"
+                                )
+                        );
+
+
+        double amount =
+                request.getAmount();
+
+
+        // Amount validation
+        if (amount <= 0) {
+
+            throw new RuntimeException(
+                    "Transfer amount must be greater than zero"
+            );
+        }
+
+
+        // Prevent self-transfer
+        if (
+                senderAccount
+                        .getAccountNumber()
+                        .equals(
+                                receiverAccount
+                                        .getAccountNumber()
+                        )
+        ) {
+
+            throw new RuntimeException(
+                    "Cannot transfer money to your own account"
+            );
+        }
+
+
+        // Balance validation
+        if (
+                senderAccount.getBalance()
+                        < amount
+        ) {
+
+            throw new RuntimeException(
+                    "Insufficient balance"
+            );
+        }
+
+
+        // Remove money from sender
+        senderAccount.setBalance(
+                senderAccount.getBalance() - amount
+        );
+
+
+        // Add money to receiver
+        receiverAccount.setBalance(
+                receiverAccount.getBalance() + amount
+        );
+
+
+        // Save both accounts
+        bankAccountRepository.save(
+                senderAccount
+        );
+
+        bankAccountRepository.save(
+                receiverAccount
+        );
+
+
+        // Create transaction
+        Transaction transaction =
+                new Transaction();
+
+        transaction.setTransactionType(
+                TransactionType.TRANSFER
+        );
+
+        transaction.setAmount(amount);
+
+        transaction.setSenderAccountNumber(
+                senderAccount.getAccountNumber()
+        );
+
+        transaction.setReceiverAccountNumber(
+                receiverAccount.getAccountNumber()
+        );
+
+        transaction.setTimestamp(
+                LocalDateTime.now()
+        );
+
+
+        transactionRepository.save(
+                transaction
+        );
+
+
+        return new BalanceResponse(
+                senderAccount.getAccountNumber(),
+                senderAccount.getBalance()
         );
     }
 
-   
-    sender.setBalance(sender.getBalance() - amount);
 
-  
-    receiver.setBalance(receiver.getBalance() + amount);
+    // =========================================================
+    // TRANSACTION HISTORY
+    // =========================================================
 
-    
-    userRepository.save(sender);
-    userRepository.save(receiver);
+    public List<TransactionResponse>
+    getTransactionHistory(String email) {
 
-    Transaction transaction = new Transaction();
+        User user =
+                userRepository
+                        .findByEmail(email)
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "User not found"
+                                )
+                        );
 
-    transaction.setTransactionType(TransactionType.TRANSFER);
-    transaction.setAmount(amount);
-    transaction.setSenderAccountNumber(sender.getAccountNumber());
-    transaction.setReceiverAccountNumber(receiver.getAccountNumber());
-    transaction.setTimestamp(LocalDateTime.now());
 
-    transactionRepository.save(transaction);
+        List<BankAccount> accounts =
+                bankAccountRepository.findByUser(user);
 
-    
-    return new BalanceResponse(
-            sender.getAccountNumber(),
-            sender.getBalance()
-    );
-}
 
-public List<TransactionResponse> getTransactionHistory(String email) {
+        if (accounts.isEmpty()) {
 
-    User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            throw new RuntimeException(
+                    "No bank account found"
+            );
+        }
 
-    String accountNumber = user.getAccountNumber();
 
-    List<Transaction> transactions =
-            transactionRepository
-                    .findBySenderAccountNumberOrReceiverAccountNumberOrderByTimestampDesc(
-                            accountNumber,
-                            accountNumber
-                    );
+        // For now use first account
+        String accountNumber =
+                accounts.get(0)
+                        .getAccountNumber();
 
-    return transactions.stream()
-            .map(transaction -> new TransactionResponse(
-                    transaction.getId(),
-                    transaction.getTransactionType(),
-                    transaction.getAmount(),
-                    transaction.getSenderAccountNumber(),
-                    transaction.getReceiverAccountNumber(),
-                    transaction.getTimestamp()
-            ))
-            .toList();
-}
+
+        List<Transaction> transactions =
+                transactionRepository
+                        .findBySenderAccountNumberOrReceiverAccountNumberOrderByTimestampDesc(
+                                accountNumber,
+                                accountNumber
+                        );
+
+
+        return transactions.stream()
+                .map(
+                        transaction ->
+                                new TransactionResponse(
+                                        transaction.getId(),
+                                        transaction.getTransactionType(),
+                                        transaction.getAmount(),
+                                        transaction.getSenderAccountNumber(),
+                                        transaction.getReceiverAccountNumber(),
+                                        transaction.getTimestamp()
+                                )
+                )
+                .toList();
+    }
 }
